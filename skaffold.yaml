@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/jegan-m/kube-go-lang:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/jegan-m/kube-go-lang:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: kube-go-lang
+        chartPath: charts/kube-go-lang
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/jegan-m/kube-go-lang'
+          image.tag: '{{.DIGEST_HEX}}'
